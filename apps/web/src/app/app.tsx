@@ -1,27 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { Message } from '@chat-app/api-interfaces';
+import { useContext } from 'react';
+import { Route, Routes } from 'react-router-dom';
+
+import ProtectedRoute from './components/ProtectedRoute';
+import Layout from './components/Layout';
+
+import Main from './components/Main';
+import ChatView from './components/ChatView';
+import Login from './components/Login';
+
+import { UserContext } from './context/UserContext';
 
 export const App = () => {
-  const [m, setMessage] = useState<Message>({ message: '' });
+  const { user } = useContext(UserContext);
 
-  useEffect(() => {
-    fetch('/api')
-      .then((r) => r.json())
-      .then(setMessage);
-  }, []);
-
-  return (
-    <>
-      <div style={{ textAlign: 'center' }}>
-        <h1>Welcome to web!</h1>
-        <img
-          width="450"
-          src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png"
-          alt="Nx - Smart, Fast and Extensible Build System"
-        />
-      </div>
-      <div>{m.message}</div>
-    </>
+  return user.isLoggedIn === null ? (
+    <>Loading</>
+  ) : (
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route element={<ProtectedRoute />}>
+          <Route index element={<Main />} />
+          <Route path="chats/:user" element={<ChatView />} />
+        </Route>
+        <Route path="login" element={<Login />} />
+      </Route>
+    </Routes>
   );
 };
 
